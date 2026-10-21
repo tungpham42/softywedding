@@ -1,12 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LegalPage, LegalSection, legalListClassName } from "@/components/legal-page";
+import {
+  LegalPage,
+  LegalSection,
+  legalListClassName,
+} from "@/components/legal-page";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
     "Read the terms that apply when using Softy Wedding to plan weddings, publish wedding websites, manage invitations, and submit RSVPs.",
   alternates: { canonical: "/terms-and-conditions" },
+  openGraph: {
+    title: "Terms & Conditions",
+    description:
+      "Read the terms that apply when using Softy Wedding to plan weddings, publish wedding websites, manage invitations, and submit RSVPs.",
+    images: [
+      {
+        url: "/terms-and-conditions.jpg",
+      },
+    ],
+  },
 };
 
 export default function TermsAndConditionsPage() {
@@ -45,11 +59,29 @@ export default function TermsAndConditionsPage() {
 
       <LegalSection title="3. Accounts and access">
         <ul className={legalListClassName}>
-          <li>You must be legally able to use the Service and provide accurate information when creating or using an account.</li>
-          <li>Sign-in may be provided through Google and Firebase Authentication. Your use of those services may also be subject to their terms.</li>
-          <li>You are responsible for keeping control of your account and for activity performed through it. Notify the service operator if you suspect unauthorized access.</li>
-          <li>Couples and planners must only access wedding workspaces and guest information they are authorized to manage. Planner access may be assigned by the wedding owner.</li>
-          <li>Do not attempt to bypass access controls, probe or disrupt the Service, or use another person’s account or invitation credentials without permission.</li>
+          <li>
+            You must be legally able to use the Service and provide accurate
+            information when creating or using an account.
+          </li>
+          <li>
+            Sign-in may be provided through Google and Firebase Authentication.
+            Your use of those services may also be subject to their terms.
+          </li>
+          <li>
+            You are responsible for keeping control of your account and for
+            activity performed through it. Notify the service operator if you
+            suspect unauthorized access.
+          </li>
+          <li>
+            Couples and planners must only access wedding workspaces and guest
+            information they are authorized to manage. Planner access may be
+            assigned by the wedding owner.
+          </li>
+          <li>
+            Do not attempt to bypass access controls, probe or disrupt the
+            Service, or use another person’s account or invitation credentials
+            without permission.
+          </li>
         </ul>
       </LegalSection>
 
@@ -82,14 +114,15 @@ export default function TermsAndConditionsPage() {
           The wedding owner is responsible for reviewing a page before
           publishing it. Once published, the information and images selected for
           the public page may be viewable by anyone with access to its URL. You
-          should unpublish a page or remove content you no longer want displayed.
+          should unpublish a page or remove content you no longer want
+          displayed.
         </p>
         <p>
           Invitation links and codes help guests find the right event. Treat
           them like private links, share them only with intended guests, and
-          request that the organizer deactivate an invitation if it is
-          misplaced or shared with the wrong person. We cannot guarantee that a
-          link or code will remain confidential after it has been shared.
+          request that the organizer deactivate an invitation if it is misplaced
+          or shared with the wrong person. We cannot guarantee that a link or
+          code will remain confidential after it has been shared.
         </p>
       </LegalSection>
 
@@ -113,11 +146,26 @@ export default function TermsAndConditionsPage() {
       <LegalSection title="7. Acceptable use">
         <p>You agree not to:</p>
         <ul className={legalListClassName}>
-          <li>use the Service for an unlawful, fraudulent, harassing, or harmful purpose;</li>
-          <li>submit false RSVP information or create invitations to mislead or abuse others;</li>
-          <li>upload malware, attempt unauthorized access, interfere with normal operation, or circumvent security controls;</li>
-          <li>scrape, copy, or use personal information from the Service in a way that violates privacy, these Terms, or applicable law; or</li>
-          <li>infringe intellectual-property, privacy, publicity, or other rights belonging to another person.</li>
+          <li>
+            use the Service for an unlawful, fraudulent, harassing, or harmful
+            purpose;
+          </li>
+          <li>
+            submit false RSVP information or create invitations to mislead or
+            abuse others;
+          </li>
+          <li>
+            upload malware, attempt unauthorized access, interfere with normal
+            operation, or circumvent security controls;
+          </li>
+          <li>
+            scrape, copy, or use personal information from the Service in a way
+            that violates privacy, these Terms, or applicable law; or
+          </li>
+          <li>
+            infringe intellectual-property, privacy, publicity, or other rights
+            belonging to another person.
+          </li>
         </ul>
         <p>
           We may investigate suspected misuse and restrict or suspend access
@@ -150,10 +198,10 @@ export default function TermsAndConditionsPage() {
 
       <LegalSection title="10. Availability and disclaimers">
         <p>
-          We work to keep the Service useful and available, but we do not promise
-          uninterrupted or error-free operation, that every record will always
-          be available, or that the Service will meet every requirement. Keep
-          copies of important event information and verify time-sensitive
+          We work to keep the Service useful and available, but we do not
+          promise uninterrupted or error-free operation, that every record will
+          always be available, or that the Service will meet every requirement.
+          Keep copies of important event information and verify time-sensitive
           arrangements independently.
         </p>
         <p>
@@ -186,8 +234,8 @@ export default function TermsAndConditionsPage() {
           You may stop using the Service at any time. We may suspend or restrict
           access when reasonably necessary to address security risks, suspected
           abuse, a violation of these Terms, legal requirements, or operational
-          needs. Where appropriate and legally permitted, we will take reasonable
-          steps to explain a restriction or resolve the issue.
+          needs. Where appropriate and legally permitted, we will take
+          reasonable steps to explain a restriction or resolve the issue.
         </p>
         <p>
           Ending use of the Service does not automatically remove information
@@ -199,7 +247,13 @@ export default function TermsAndConditionsPage() {
 
       <LegalSection title="13. Privacy">
         <p>
-          Our <Link className="font-semibold text-pine underline decoration-[#c8a66e] underline-offset-4 hover:text-terra" href="/privacy-policy">Privacy Policy</Link>{" "}
+          Our{" "}
+          <Link
+            className="font-semibold text-pine underline decoration-[#c8a66e] underline-offset-4 hover:text-terra"
+            href="/privacy-policy"
+          >
+            Privacy Policy
+          </Link>{" "}
           explains how information may be collected, used, and shared when you
           use the Service. By using the Service, you acknowledge that policy.
         </p>
@@ -210,8 +264,8 @@ export default function TermsAndConditionsPage() {
           We may revise these Terms as the Service or applicable requirements
           change. The “Last updated” date above identifies the current revision.
           Where required, material changes will be communicated or presented for
-          acceptance. If you continue to use the Service after revised Terms take
-          effect, the revised Terms apply to the extent permitted by law.
+          acceptance. If you continue to use the Service after revised Terms
+          take effect, the revised Terms apply to the extent permitted by law.
         </p>
       </LegalSection>
 
@@ -219,9 +273,9 @@ export default function TermsAndConditionsPage() {
         <p>
           These Terms are subject to applicable law. They do not take away any
           non-waivable rights or consumer protections that apply to you. Any
-          dispute should first be raised with the service operator so the parties
-          can try to resolve it informally, without limiting rights available
-          under applicable law.
+          dispute should first be raised with the service operator so the
+          parties can try to resolve it informally, without limiting rights
+          available under applicable law.
         </p>
         <p>
           For questions about these Terms or the Service, contact the Softy

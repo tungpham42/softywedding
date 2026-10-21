@@ -54,6 +54,20 @@ export async function generateMetadata({
   return data
     ? {
         title: `Invitation to ${data.wedding.partnerOne} & ${data.wedding.partnerTwo}`,
+        description: `Invitation to ${data.wedding.partnerOne} & ${data.wedding.partnerTwo}`,
+        openGraph: {
+          title: `Invitation to ${data.wedding.partnerOne} & ${data.wedding.partnerTwo}`,
+          description: `Invitation to ${data.wedding.partnerOne} & ${data.wedding.partnerTwo}`,
+          images: [
+            {
+              url: data.wedding.heroImage
+                ? data.wedding.heroImage
+                : `https://placehold.co/1200x630/2D4033/FFFFFF/jpeg?font=roboto&text=${encodeURIComponent("Invitation from " + data.wedding.partnerOne + " and " + data.wedding.partnerTwo)}`,
+              width: 1200,
+              height: 630,
+            },
+          ],
+        },
       }
     : { title: "Wedding invitation not found" };
 }

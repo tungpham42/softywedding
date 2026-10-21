@@ -1,11 +1,25 @@
 import type { Metadata } from "next";
-import { LegalPage, LegalSection, legalListClassName } from "@/components/legal-page";
+import {
+  LegalPage,
+  LegalSection,
+  legalListClassName,
+} from "@/components/legal-page";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "Learn how Softy Wedding handles account, wedding-planning, invitation, and RSVP information.",
   alternates: { canonical: "/privacy-policy" },
+  openGraph: {
+    title: "Privacy Policy",
+    description:
+      "Learn how Softy Wedding handles account, wedding-planning, invitation, and RSVP information.",
+    images: [
+      {
+        url: "/privacy-policy.jpg",
+      },
+    ],
+  },
 };
 
 export default function PrivacyPolicyPage() {
@@ -34,13 +48,17 @@ export default function PrivacyPolicyPage() {
         <p>Depending on how you use the Service, information may include:</p>
         <ul className={legalListClassName}>
           <li>
-            <strong className="text-ink">Account and sign-in information:</strong>{" "}
+            <strong className="text-ink">
+              Account and sign-in information:
+            </strong>{" "}
             your Firebase account identifier and basic profile information made
             available through Google sign-in, such as your name or email
             address.
           </li>
           <li>
-            <strong className="text-ink">Wedding and planning information:</strong>{" "}
+            <strong className="text-ink">
+              Wedding and planning information:
+            </strong>{" "}
             partner names, wedding date, venue and location, headline, story,
             ceremony and reception times, schedule items, planning tasks, and
             saved design preferences.
@@ -51,10 +69,9 @@ export default function PrivacyPolicyPage() {
             allowed guest count, and whether an invitation is active.
           </li>
           <li>
-            <strong className="text-ink">RSVP information:</strong>{" "}
-            a guest’s name and email address, attendance response, party size,
-            meal preference, invitation code, and the time the response was
-            recorded.
+            <strong className="text-ink">RSVP information:</strong> a guest’s
+            name and email address, attendance response, party size, meal
+            preference, invitation code, and the time the response was recorded.
           </li>
           <li>
             <strong className="text-ink">Photos and other content:</strong>{" "}
@@ -62,11 +79,13 @@ export default function PrivacyPolicyPage() {
             Wedding cover-image uploads may be processed by Cloudinary.
           </li>
           <li>
-            <strong className="text-ink">Technical and usage information:</strong>{" "}
+            <strong className="text-ink">
+              Technical and usage information:
+            </strong>{" "}
             information processed by the hosting and security infrastructure
             when you access the Service. If analytics integrations are enabled
-            for the deployment, related usage and device information may also
-            be collected by those tools.
+            for the deployment, related usage and device information may also be
+            collected by those tools.
           </li>
         </ul>
         <p>
@@ -79,13 +98,34 @@ export default function PrivacyPolicyPage() {
       <LegalSection title="3. How we use information">
         <p>Information may be used to:</p>
         <ul className={legalListClassName}>
-          <li>authenticate users and protect private couple and planner workspaces;</li>
-          <li>create and manage wedding details, checklists, schedules, and design settings;</li>
-          <li>publish wedding websites when an authorized user chooses to publish them;</li>
-          <li>create invitations, verify invitation codes, receive RSVPs, and show response status to the relevant couple or planner;</li>
-          <li>process requested cover-image uploads and deliver the Service’s features;</li>
-          <li>maintain, troubleshoot, secure, and improve the Service, including measuring usage where analytics tools are enabled; and</li>
-          <li>respond to requests, protect users, and comply with applicable legal obligations.</li>
+          <li>
+            authenticate users and protect private couple and planner
+            workspaces;
+          </li>
+          <li>
+            create and manage wedding details, checklists, schedules, and design
+            settings;
+          </li>
+          <li>
+            publish wedding websites when an authorized user chooses to publish
+            them;
+          </li>
+          <li>
+            create invitations, verify invitation codes, receive RSVPs, and show
+            response status to the relevant couple or planner;
+          </li>
+          <li>
+            process requested cover-image uploads and deliver the Service’s
+            features;
+          </li>
+          <li>
+            maintain, troubleshoot, secure, and improve the Service, including
+            measuring usage where analytics tools are enabled; and
+          </li>
+          <li>
+            respond to requests, protect users, and comply with applicable legal
+            obligations.
+          </li>
         </ul>
       </LegalSection>
 
@@ -98,9 +138,9 @@ export default function PrivacyPolicyPage() {
           you do not want made public.
         </p>
         <p>
-          Invitation links and codes are intended for the guests selected by
-          the couple or planner. Anyone who obtains a working invitation link
-          or code may be able to access the associated invitation flow, so share
+          Invitation links and codes are intended for the guests selected by the
+          couple or planner. Anyone who obtains a working invitation link or
+          code may be able to access the associated invitation flow, so share
           them thoughtfully and ask the organizer to deactivate a code if it is
           shared unintentionally.
         </p>
@@ -125,19 +165,21 @@ export default function PrivacyPolicyPage() {
             Firebase and Google services support authentication and data
             storage. Cloudinary may process uploaded cover images. Google
             Analytics or Google Tag Manager may be used if configured by the
-            deployment operator. These providers process information under
-            their own terms and privacy practices as applicable.
+            deployment operator. These providers process information under their
+            own terms and privacy practices as applicable.
           </li>
           <li>
-            <strong className="text-ink">For legal and security reasons:</strong>{" "}
+            <strong className="text-ink">
+              For legal and security reasons:
+            </strong>{" "}
             information may be disclosed when reasonably necessary to comply
             with law, respond to lawful requests, enforce the terms, or protect
             the rights, safety, and security of users or the Service.
           </li>
           <li>
-            <strong className="text-ink">At your direction:</strong>{" "}
-            information may be shared when you ask us to do so or choose to
-            publish it through the Service.
+            <strong className="text-ink">At your direction:</strong> information
+            may be shared when you ask us to do so or choose to publish it
+            through the Service.
           </li>
         </ul>
         <p>
@@ -170,17 +212,18 @@ export default function PrivacyPolicyPage() {
       <LegalSection title="7. Your choices and privacy rights">
         <p>
           Depending on applicable law, you may have the right to request access
-          to, correction of, or deletion of personal information, or to object to
-          or restrict certain processing. You can also ask the wedding organizer
-          to correct an RSVP or deactivate an invitation code that they manage.
+          to, correction of, or deletion of personal information, or to object
+          to or restrict certain processing. You can also ask the wedding
+          organizer to correct an RSVP or deactivate an invitation code that
+          they manage.
         </p>
         <p>
           To make a privacy request, contact the operator of the Softy Wedding
           deployment using the contact details it provides. The operator may
           need to verify your identity and may retain some information where
-          permitted or required by law. If you are a guest, the couple or planner
-          who collected your RSVP may be the most direct contact for correcting
-          information associated with that wedding.
+          permitted or required by law. If you are a guest, the couple or
+          planner who collected your RSVP may be the most direct contact for
+          correcting information associated with that wedding.
         </p>
       </LegalSection>
 

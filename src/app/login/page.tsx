@@ -5,7 +5,19 @@ import { SiteFooter } from "@/components/site-footer";
 import { SignInButtons } from "@/components/auth/sign-in-buttons";
 import { Icon } from "@/components/ui/icon";
 
-export const metadata: Metadata = { title: "Login now" };
+export const metadata: Metadata = {
+  title: "Login now",
+  description: "Login now",
+  openGraph: {
+    title: "Login now",
+    description: "Login now",
+    images: [
+      {
+        url: "/login.jpg",
+      },
+    ],
+  },
+};
 
 export default function LoginPage() {
   return (
