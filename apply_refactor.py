@@ -223,8 +223,8 @@ replace_once(
 )
 replace_once(
     "src/app/[slug]/page.tsx",
-    '      <section className="px-5 pb-20 sm:pb-28">',
-    '      {wedding.design.showRsvpButton && (\n      <section className="px-5 pb-20 sm:pb-28">',
+    '      <section className="px-5 py-20 sm:py-28">',
+    '      {wedding.design.showRsvpButton && (\n      <section className="px-5 py-20 sm:py-28">',
 )
 replace_once(
     "src/app/[slug]/page.tsx",

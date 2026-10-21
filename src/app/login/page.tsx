@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { AlternativeSignInButtons } from "@/components/auth/alternative-sign-in-buttons";
 import { Icon } from "@/components/ui/icon";
 
 export const metadata: Metadata = { title: "Login now" };
@@ -36,6 +37,7 @@ export default function LoginPage() {
             </p>
             <div className="mt-6">
               <GoogleSignInButton />
+              <AlternativeSignInButtons />
             </div>
             <div className="mt-5 flex items-start gap-2.5 border-t border-line pt-4">
               <Icon

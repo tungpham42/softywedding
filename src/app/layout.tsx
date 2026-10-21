@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { ScrollToTop } from "@/components/scrollToTop";
+import { ScrollToTop } from "@/components/scroll-to-top";
 import "./globals.css";
 
 export const metadata: Metadata = {

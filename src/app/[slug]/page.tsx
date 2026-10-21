@@ -180,7 +180,7 @@ export default async function WeddingWebsitePage({
       )}
 
       {wedding.storyPhotos.length > 0 && (
-        <section id="our-story-photos" className="px-5 pb-20 sm:pb-28">
+        <section id="our-story-photos" className="px-5 py-20 sm:py-28">
           <div className="mx-auto max-w-[1100px]">
             <div className="mx-auto max-w-[640px] text-center">
               <p className="eyebrow text-terra">
@@ -310,7 +310,7 @@ export default async function WeddingWebsitePage({
         </section>
       )}
 
-      <section className="px-5 pb-20 sm:pb-28">
+      <section className="px-5 py-20 sm:py-28">
         <div className="mx-auto max-w-[860px] rounded-[26px] bg-pine px-6 py-12 text-center text-white sm:px-12 sm:py-16">
           <p className="eyebrow text-white/55">Save the date</p>
           <h2 className="font-display mt-4 text-[42px] leading-tight sm:text-[58px]">

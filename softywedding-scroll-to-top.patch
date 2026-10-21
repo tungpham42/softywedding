@@ -5,7 +5,7 @@ index 6bdc9ec..0000000 100644
 @@ -1,5 +1,6 @@
  import type { Metadata, Viewport } from "next";
  import Script from "next/script";
-+import { ScrollToTop } from "@/components/scrollToTop";
++import { ScrollToTop } from "@/components/scroll-to-top";
  import "./globals.css";
  
  export const metadata: Metadata = {
@@ -17,10 +17,10 @@ index 6bdc9ec..0000000 100644
          {children}{" "}
          {process.env.NEXT_PUBLIC_GA_ID && (
            <>
-diff --git a/src/components/scrollToTop.tsx b/src/components/scrollToTop.tsx
+diff --git a/src/components/scroll-to-top.tsx b/src/components/scroll-to-top.tsx
 new file mode 100644
 --- /dev/null
-+++ b/src/components/scrollToTop.tsx
++++ b/src/components/scroll-to-top.tsx
 @@ -0,0 +1,24 @@
 +"use client";
 +
