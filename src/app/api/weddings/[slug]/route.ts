@@ -1,6 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb, verifyBearerToken } from "@/lib/firebase/admin";
-import { readWeddingSchedule, readWeddingTasks } from "@/lib/wedding";
+import { readWeddingSchedule, readWeddingStoryPhotos, readWeddingTasks } from "@/lib/wedding";
 
 export const runtime = "nodejs";
 
@@ -39,6 +39,7 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
       ...result.data,
       date: typeof result.data.date === "string" ? result.data.date : "",
       schedule: readWeddingSchedule(result.data.schedule),
+      storyPhotos: readWeddingStoryPhotos(result.data.storyPhotos),
       tasks: readWeddingTasks(result.data.tasks),
       published: result.data.published === true,
       invitedCount: inviteSnap.size,
@@ -106,6 +107,24 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
     }));
     if (schedule.some((item) => !item.title)) return Response.json({ error: "Every schedule item needs a title." }, { status: 400 });
     updates.schedule = schedule;
+  }
+  if ("storyPhotos" in body) {
+    if (!Array.isArray(body.storyPhotos) || body.storyPhotos.length > 30) {
+      return Response.json({ error: "Story photos must contain at most 30 items." }, { status: 400 });
+    }
+    const storyPhotos = body.storyPhotos.filter(isRecord).map((photo, index) => ({
+      id: typeof photo.id === "string" && photo.id.trim() ? photo.id.trim().slice(0, 100) : `story-photo-${index + 1}`,
+      url: typeof photo.url === "string" ? photo.url.trim().slice(0, 2000) : "",
+      caption: typeof photo.caption === "string" ? photo.caption.trim().slice(0, 240) : "",
+      altText: typeof photo.altText === "string" ? photo.altText.trim().slice(0, 160) : "",
+    }));
+    if (storyPhotos.length !== body.storyPhotos.length || storyPhotos.some((photo) => !photo.url || !/^https:\/\//i.test(photo.url))) {
+      return Response.json({ error: "Each story photo must have a valid HTTPS image URL." }, { status: 400 });
+    }
+    if (new Set(storyPhotos.map((photo) => photo.id)).size !== storyPhotos.length) {
+      return Response.json({ error: "Story photo IDs must be unique." }, { status: 400 });
+    }
+    updates.storyPhotos = storyPhotos;
   }
   if ("tasks" in body) {
     if (!Array.isArray(body.tasks) || body.tasks.length > 100) return Response.json({ error: "Checklist must contain at most 100 tasks." }, { status: 400 });

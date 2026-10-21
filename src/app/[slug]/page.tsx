@@ -5,7 +5,9 @@ import { getAdminDb } from "@/lib/firebase/admin";
 import {
   readString,
   readWeddingSchedule,
+  readWeddingStoryPhotos,
   type WeddingScheduleItem,
+  type WeddingStoryPhoto,
 } from "@/lib/wedding";
 import { formatWeddingDate } from "@/lib/utils";
 import { SiteFooter } from "@/components/site-footer";
@@ -25,6 +27,7 @@ type PublicWedding = {
   story: string;
   heroImage: string;
   schedule: WeddingScheduleItem[];
+  storyPhotos: WeddingStoryPhoto[];
 };
 
 async function getWedding(slug: string): Promise<PublicWedding | null> {
@@ -46,6 +49,7 @@ async function getWedding(slug: string): Promise<PublicWedding | null> {
     story: readString(data.story),
     heroImage: readString(data.heroImage),
     schedule: readWeddingSchedule(data.schedule),
+    storyPhotos: readWeddingStoryPhotos(data.storyPhotos),
   };
 }
 
@@ -58,10 +62,25 @@ export async function generateMetadata({
   const wedding = await getWedding(slug);
   return wedding
     ? {
-        title: `${wedding.partnerOne} & ${wedding.partnerTwo} — Wedding website`,
+        title: `${wedding.partnerOne} & ${wedding.partnerTwo}`,
         description:
           wedding.headline ||
-          `Wedding details for ${wedding.partnerOne} and ${wedding.partnerTwo}.`,
+          `Wedding details for ${wedding.partnerOne} & ${wedding.partnerTwo}.`,
+        openGraph: {
+          title: `${wedding.partnerOne} & ${wedding.partnerTwo}`,
+          description:
+            wedding.headline ||
+            `Wedding details for ${wedding.partnerOne} & ${wedding.partnerTwo}.`,
+          images: [
+            {
+              url: wedding.heroImage
+                ? wedding.heroImage
+                : `https://placehold.co/1200x630/2D4033/FFFFFF/jpeg?font=roboto&text=${encodeURIComponent(wedding.partnerOne + " & " + wedding.partnerTwo)}`,
+              width: 1200,
+              height: 630,
+            },
+          ],
+        },
       }
     : { title: "Wedding website not found" };
 }
@@ -75,7 +94,6 @@ export default async function WeddingWebsitePage({
   const wedding = await getWedding(slug);
   if (!wedding || !wedding.partnerOne || !wedding.partnerTwo || !wedding.date)
     notFound();
-  const names = `${wedding.partnerOne} & ${wedding.partnerTwo}`;
   const hasVenue = Boolean(
     wedding.venue || wedding.location || wedding.ceremonyTime,
   );
@@ -93,6 +111,7 @@ export default async function WeddingWebsitePage({
           Guest details <Icon name="arrow-up-right" size={14} />
         </Link>
       </header>
+
       <section
         className={`relative flex min-h-[650px] items-center justify-center overflow-hidden px-5 py-24 text-center text-white sm:min-h-[750px] sm:py-28 ${wedding.heroImage ? "bg-cover bg-center" : "bg-pine"}`}
         style={
@@ -113,7 +132,7 @@ export default async function WeddingWebsitePage({
           <h1 className="font-display mt-5 text-[62px] leading-[.94] sm:text-[88px] lg:text-[104px]">
             {wedding.partnerOne}
             <br />
-            <span className="italic text-[#edc6b5]">&</span>{" "}
+            <span className="italic text-[#edc6b5]">&amp;</span>{" "}
             {wedding.partnerTwo}
           </h1>
           <div className="mx-auto my-7 h-px w-24 bg-white/50" />
@@ -125,9 +144,11 @@ export default async function WeddingWebsitePage({
               {[wedding.venue, wedding.location].filter(Boolean).join(" · ")}
             </p>
           )}
-          {wedding.schedule.length > 0 && (
+          {(wedding.schedule.length > 0 || wedding.storyPhotos.length > 0) && (
             <a
-              href="#our-day"
+              href={
+                wedding.schedule.length > 0 ? "#our-day" : "#our-story-photos"
+              }
               className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#fbf8f2] px-6 text-sm font-semibold text-pine transition-colors hover:bg-white"
             >
               Our day, together <Icon name="arrow-right" size={16} />
@@ -153,6 +174,46 @@ export default async function WeddingWebsitePage({
             <div className="mt-8 flex items-center justify-center gap-2 text-xs font-semibold text-pine">
               <Icon name="heart" size={15} /> We can’t wait to celebrate with
               you.
+            </div>
+          </div>
+        </section>
+      )}
+
+      {wedding.storyPhotos.length > 0 && (
+        <section id="our-story-photos" className="px-5 pb-20 sm:pb-28">
+          <div className="mx-auto max-w-[1100px]">
+            <div className="mx-auto max-w-[640px] text-center">
+              <p className="eyebrow text-terra">
+                Little moments, a lifetime of memories
+              </p>
+              <h2 className="font-display mt-3 text-[42px] leading-tight sm:text-[56px]">
+                Our story in photographs.
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                A few moments from the journey that brought us here.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {wedding.storyPhotos.map((photo, index) => (
+                <figure
+                  key={photo.id}
+                  className={`overflow-hidden rounded-2xl border border-line bg-white ${index % 5 === 1 ? "sm:translate-y-5" : ""}`}
+                >
+                  <img
+                    src={photo.url}
+                    alt={
+                      photo.altText || photo.caption || "Wedding story photo"
+                    }
+                    loading="lazy"
+                    className="h-[280px] w-full object-cover sm:h-[320px]"
+                  />
+                  {photo.caption && (
+                    <figcaption className="px-4 py-3 text-center text-sm leading-6 text-muted">
+                      {photo.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              ))}
             </div>
           </div>
         </section>

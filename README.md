@@ -75,7 +75,7 @@ Fields used by the application:
 - `venue`, `location`, `headline`, `story`, `ceremonyTime`, `receptionTime`, `heroImage`.
 - `schedule`: array of `{ time, title, description }` objects.
 - `tasks`: array of `{ id, category, title, detail, due, done }` objects.
-- `published`: boolean. The public `/w/{slug}` route appears only when true.
+- `published`: boolean. The public `/{slug}` route appears only when true.
 - `ownerUid`: Firebase Authentication UID of the account that owns the wedding.
 - `plannerUid`: optional Firebase Authentication UID of an assigned planner.
 - `createdAt`, `updatedAt`: server timestamps.
@@ -103,10 +103,11 @@ Firestore Admin bypasses Firestore Security Rules, so private route handlers che
 - `/` — marketing home.
 - `/login` — Google sign-in.
 - `/couple` — create/manage your own wedding, update planning checklist and website details, manage invitation codes, and upload a cover image.
+- `/couple/design` — customize the published wedding website theme, typography, layout, cover treatment, photo focal point, and visible page sections.
 - `/planner` — weddings connected to the signed-in account, with real guest-response metrics and planning progress.
 - `/guest` — invitation-code lookup.
 - `/invite/{CODE}` — actual invitation record and RSVP form.
-- `/w/{slug}` — published wedding website backed by Firestore.
+- `/{slug}` — published wedding website backed by Firestore.
 
 ## API routes
 
@@ -118,6 +119,12 @@ Firestore Admin bypasses Firestore Security Rules, so private route handlers che
 - `POST /api/weddings/{slug}/invitations` — create a unique guest invitation code.
 - `POST /api/rsvp` — validate and persist RSVP submissions.
 - `POST /api/cloudinary/signature` — return a signed upload signature for an authenticated user.
+
+## Wedding website personalization
+
+The design studio stores a validated `design` object on each `weddings/{slug}` document. Five preset palettes (Garden sage, Rosewater, Coastal blue, Midnight velvet, and Sunset terracotta), three typography styles, three layouts, photo/solid hero treatments, cover focal points, independent story/schedule/venue/RSVP visibility settings, and editable welcome/story/schedule/button/closing copy are supported. Existing wedding documents safely fall back to the default design. Design updates use the same authenticated owner/planner checks as the rest of the workspace, and only validated preset values are persisted.
+
+Open `/couple/design` to personalize a wedding and preview the visual choices. A published page reflects the saved settings immediately.
 
 ## Validation
 

@@ -13,7 +13,12 @@ import { getFirebaseAuth } from "@/lib/firebase/client";
 import { Icon } from "@/components/ui/icon";
 import { CloudinaryUpload } from "@/components/dashboard/cloudinary-upload";
 import { WeddingInvitations } from "@/components/dashboard/wedding-invitations";
-import type { Wedding, WeddingTask, WeddingScheduleItem } from "@/lib/wedding";
+import type {
+  Wedding,
+  WeddingTask,
+  WeddingScheduleItem,
+  WeddingStoryPhoto,
+} from "@/lib/wedding";
 
 function formatDate(value: string) {
   if (!value) return "Date not set";
@@ -207,6 +212,10 @@ export function CoupleWorkspace() {
   const [scheduleTitle, setScheduleTitle] = useState("");
   const [scheduleDescription, setScheduleDescription] = useState("");
   const [scheduleBusy, setScheduleBusy] = useState(false);
+  const [storyPhotoDrafts, setStoryPhotoDrafts] = useState<
+    Record<string, { caption: string; altText: string }>
+  >({});
+  const [storyPhotoBusy, setStoryPhotoBusy] = useState(false);
 
   const loadWeddings = useCallback(
     async (currentUser: User, selectSlug?: string) => {
@@ -334,6 +343,97 @@ export function CoupleWorkspace() {
     }
   }
 
+  useEffect(() => {
+    const photos = activeWedding?.storyPhotos ?? [];
+    setStoryPhotoDrafts(
+      Object.fromEntries(
+        photos.map((photo) => [
+          photo.id,
+          { caption: photo.caption ?? "", altText: photo.altText ?? "" },
+        ]),
+      ),
+    );
+  }, [activeWedding?.slug, activeWedding?.storyPhotos]);
+
+  async function saveStoryPhoto(photoId: string) {
+    if (!activeWedding) return;
+    const draft = storyPhotoDrafts[photoId];
+    if (!draft) return;
+    setStoryPhotoBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const storyPhotos = (activeWedding.storyPhotos ?? []).map((photo) =>
+        photo.id === photoId
+          ? {
+              ...photo,
+              caption: draft.caption.trim(),
+              altText: draft.altText.trim(),
+            }
+          : photo,
+      );
+      await updateWedding({ storyPhotos });
+      setNotice("Story photo details saved.");
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not save the story photo details.",
+      );
+    } finally {
+      setStoryPhotoBusy(false);
+    }
+  }
+
+  async function removeStoryPhoto(photoId: string) {
+    if (!activeWedding) return;
+    if (!window.confirm("Remove this photo from your wedding story?")) return;
+    setStoryPhotoBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const storyPhotos = (activeWedding.storyPhotos ?? []).filter(
+        (photo) => photo.id !== photoId,
+      );
+      await updateWedding({ storyPhotos });
+      setNotice("Photo removed from your wedding story.");
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not remove the story photo.",
+      );
+    } finally {
+      setStoryPhotoBusy(false);
+    }
+  }
+
+  function addStoryPhoto(url: string) {
+    if (!activeWedding) return;
+    const existingPhotos = activeWedding.storyPhotos ?? [];
+    if (existingPhotos.length >= 30) {
+      setError("You can add up to 30 photos to your wedding story.");
+      return;
+    }
+    const photo: WeddingStoryPhoto = {
+      id: crypto.randomUUID(),
+      url,
+      caption: "",
+      altText: `${activeWedding.partnerOne} and ${activeWedding.partnerTwo}`,
+    };
+    setError("");
+    setNotice("");
+    void updateWedding({ storyPhotos: [...existingPhotos, photo] })
+      .then(() => setNotice("Photo added to your wedding story."))
+      .catch((cause) =>
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Could not save the uploaded story photo.",
+        ),
+      );
+  }
+
   async function toggleTask(task: WeddingTask) {
     if (!activeWedding) return;
     const tasks = activeWedding.tasks.map((item) =>
@@ -432,7 +532,7 @@ export function CoupleWorkspace() {
     if (!activeWedding) return;
     try {
       await navigator.clipboard.writeText(
-        `${window.location.origin}/w/${activeWedding.slug}`,
+        `${window.location.origin}/${activeWedding.slug}`,
       );
       setNotice("Wedding website URL copied.");
       setError("");
@@ -569,12 +669,19 @@ export function CoupleWorkspace() {
           </Link>
           <Link
             href={
-              activeWedding?.published ? `/w/${activeWedding.slug}` : "/couple"
+              activeWedding?.published ? `/${activeWedding.slug}` : "/couple"
             }
             className="flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium text-muted hover:bg-sage-soft hover:text-pine"
           >
             <Icon name="globe" size={17} />
             Wedding website
+          </Link>
+          <Link
+            href="/couple/design"
+            className="flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-medium text-muted hover:bg-sage-soft hover:text-pine"
+          >
+            <Icon name="settings" size={17} />
+            Design studio
           </Link>
           <Link
             href="/guest"
@@ -601,7 +708,7 @@ export function CoupleWorkspace() {
           </p>
           {activeWedding?.published && (
             <Link
-              href={`/w/${activeWedding.slug}`}
+              href={`/${activeWedding.slug}`}
               className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-pine"
             >
               See your website <Icon name="arrow-right" size={13} />
@@ -659,9 +766,10 @@ export function CoupleWorkspace() {
               {
                 label: "Wedding website",
                 href: activeWedding?.published
-                  ? `/w/${activeWedding.slug}`
+                  ? `/${activeWedding.slug}`
                   : "/couple",
               },
+              { label: "Design studio", href: "/couple/design" },
               { label: "Guest list & RSVPs", href: "/guest" },
               { label: "Planner", href: "/planner" },
             ].map((item) => (
@@ -796,7 +904,7 @@ export function CoupleWorkspace() {
                     </button>
                     {activeWedding.published && (
                       <Link
-                        href={`/w/${activeWedding.slug}`}
+                        href={`/${activeWedding.slug}`}
                         target="_blank"
                         className={`inline-flex h-11 items-center justify-center gap-2 rounded-full px-4 text-xs font-bold transition-colors ${activeWedding.heroImage ? "border border-white/40 bg-white/10 text-white hover:bg-white/20" : "border border-line bg-paper text-ink hover:border-pine"}`}
                       >
@@ -1000,7 +1108,7 @@ export function CoupleWorkspace() {
                     <div className="mt-4 rounded-xl bg-[#f4f3eb] p-3">
                       <p className="text-[10px] text-muted">Website URL</p>
                       <p className="mt-1 break-all text-xs font-semibold text-pine">
-                        /w/{activeWedding.slug}
+                        /{activeWedding.slug}
                       </p>
                     </div>
                     <button
@@ -1276,21 +1384,176 @@ export function CoupleWorkspace() {
                   onUpdated={() => void loadWeddings(user, activeWedding.slug)}
                 />
               </div>
+              <section className="mt-5 rounded-2xl border border-line bg-paper p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="eyebrow text-muted">
+                      Wedding website content
+                    </p>
+                    <h2 className="font-display mt-1 text-[24px]">
+                      Photos to your story
+                    </h2>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
+                      Add moments from your journey, write captions and
+                      accessible image descriptions, or remove photos. Photos
+                      appear on your public wedding website after publishing.
+                    </p>
+                  </div>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f2e5dd] text-terra">
+                    <Icon name="camera" size={17} />
+                  </span>
+                </div>
+                <div className="mt-4">
+                  {(activeWedding.storyPhotos ?? []).length > 0 ? (
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {(activeWedding.storyPhotos ?? []).map((photo) => {
+                        const draft = storyPhotoDrafts[photo.id] ?? {
+                          caption: photo.caption ?? "",
+                          altText: photo.altText ?? "",
+                        };
+                        return (
+                          <article
+                            key={photo.id}
+                            className="overflow-hidden rounded-xl border border-line bg-white"
+                          >
+                            <img
+                              src={photo.url}
+                              alt={
+                                draft.altText ||
+                                photo.caption ||
+                                "Wedding story photo"
+                              }
+                              loading="lazy"
+                              className="h-48 w-full object-cover"
+                            />
+                            <div className="space-y-3 p-3">
+                              <div>
+                                <label
+                                  htmlFor={`story-caption-${photo.id}`}
+                                  className="mb-1 block text-[11px] font-semibold"
+                                >
+                                  Caption
+                                </label>
+                                <input
+                                  id={`story-caption-${photo.id}`}
+                                  maxLength={240}
+                                  value={draft.caption}
+                                  onChange={(event) =>
+                                    setStoryPhotoDrafts((current) => ({
+                                      ...current,
+                                      [photo.id]: {
+                                        ...draft,
+                                        caption: event.target.value,
+                                      },
+                                    }))
+                                  }
+                                  placeholder="A little moment worth remembering"
+                                  className="h-9 w-full rounded-lg border border-line bg-white px-2.5 text-xs outline-none focus:border-pine"
+                                />
+                              </div>
+                              <div>
+                                <label
+                                  htmlFor={`story-alt-${photo.id}`}
+                                  className="mb-1 block text-[11px] font-semibold"
+                                >
+                                  Image description
+                                </label>
+                                <input
+                                  id={`story-alt-${photo.id}`}
+                                  maxLength={160}
+                                  value={draft.altText}
+                                  onChange={(event) =>
+                                    setStoryPhotoDrafts((current) => ({
+                                      ...current,
+                                      [photo.id]: {
+                                        ...draft,
+                                        altText: event.target.value,
+                                      },
+                                    }))
+                                  }
+                                  placeholder="Describe the photo for screen readers"
+                                  className="h-9 w-full rounded-lg border border-line bg-white px-2.5 text-xs outline-none focus:border-pine"
+                                />
+                              </div>
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
+                                <button
+                                  type="button"
+                                  disabled={storyPhotoBusy}
+                                  onClick={() => void saveStoryPhoto(photo.id)}
+                                  className="inline-flex h-9 items-center gap-1.5 rounded-full bg-pine px-3 text-xs font-semibold text-white disabled:opacity-50"
+                                >
+                                  <Icon name="check" size={13} /> Save photo
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={storyPhotoBusy}
+                                  onClick={() =>
+                                    void removeStoryPhoto(photo.id)
+                                  }
+                                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line px-3 text-xs font-semibold text-terra hover:border-terra disabled:opacity-50"
+                                >
+                                  <Icon name="close" size={13} /> Remove
+                                </button>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="rounded-xl bg-[#f4f3eb] px-4 py-5 text-xs leading-5 text-muted">
+                      Your story gallery is empty. Upload a photo below to
+                      begin.
+                    </p>
+                  )}
+                </div>
+                {(activeWedding.storyPhotos ?? []).length < 30 ? (
+                  <div className="mt-4">
+                    <CloudinaryUpload
+                      eyebrow="Your love story"
+                      heading="Add a photo to the story"
+                      description="Upload a JPG, PNG, WebP or AVIF image. Once saved, it will appear in the story gallery on your wedding website."
+                      buttonLabel="Upload story photo"
+                      onImageUploaded={addStoryPhoto}
+                    />
+                  </div>
+                ) : (
+                  <p className="mt-4 text-xs text-muted">
+                    You have reached the 30-photo limit for this story.
+                  </p>
+                )}
+              </section>
               <div className="mt-5">
                 <CloudinaryUpload
-                  onImageUploaded={(url) =>
-                    updateWedding({ heroImage: url })
-                      .then(() =>
-                        setNotice("Your wedding cover photo was saved."),
-                      )
-                      .catch((cause) =>
-                        setError(
-                          cause instanceof Error
-                            ? cause.message
-                            : "Could not save the cover photo.",
-                        ),
-                      )
+                  key={activeWedding.slug}
+                  eyebrow="Wedding website"
+                  heading={
+                    activeWedding.heroImage
+                      ? "Change your cover photo"
+                      : "Choose a cover photo"
                   }
+                  description={
+                    activeWedding.heroImage
+                      ? "Your current cover is shown below. Upload a new image to replace it on your public wedding website."
+                      : "Choose a beautiful image for the hero section at the top of your public wedding website."
+                  }
+                  buttonLabel={
+                    activeWedding.heroImage
+                      ? "Replace cover photo"
+                      : "Upload cover photo"
+                  }
+                  currentImageUrl={activeWedding.heroImage}
+                  currentImageAlt={`${activeWedding.partnerOne} and ${activeWedding.partnerTwo} wedding cover photo`}
+                  onImageUploaded={async (url) => {
+                    await updateWedding({ heroImage: url });
+                    setError("");
+                    setNotice("Your wedding cover photo was saved.");
+                  }}
+                  onImageRemoved={async () => {
+                    await updateWedding({ heroImage: "" });
+                    setError("");
+                    setNotice("Your wedding cover photo was removed.");
+                  }}
                 />
               </div>
               <p className="mt-6 text-center text-[10px] text-muted">
