@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Starter default: all Firestore reads/writes are routed through authenticated
+    // Next.js server handlers using Firebase Admin. Admin SDK bypasses these rules.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

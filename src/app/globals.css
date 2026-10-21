@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #f8f5ef;
+  --color-paper: #fffdf9;
+  --color-ink: #24352c;
+  --color-muted: #747b72;
+  --color-pine: #315746;
+  --color-pine-dark: #223f32;
+  --color-sage: #dfe8dd;
+  --color-sage-soft: #edf1e9;
+  --color-rose: #ead0c5;
+  --color-terra: #b86f56;
+  --color-line: #e9e4dc;
+  --color-gold: #c4a46b;
+  --font-sans: Arial, Helvetica, sans-serif;
+}
+
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: #f8f5ef; color: #24352c; font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, textarea, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { background: #dfe8dd; color: #223f32; }
+.font-display { font-family: Georgia, 'Times New Roman', serif; letter-spacing: -0.045em; }
+.container-wide { width: min(1160px, calc(100% - 48px)); margin-inline: auto; }
+.eyebrow { letter-spacing: .18em; text-transform: uppercase; font-size: 10px; font-weight: 700; }
+.surface-shadow { box-shadow: 0 20px 60px rgba(44, 54, 43, .10); }
+.soft-shadow { box-shadow: 0 8px 28px rgba(44, 54, 43, .07); }
+.photo-wash { background: linear-gradient(180deg, rgba(21, 40, 30, .03) 15%, rgba(21, 40, 30, .46) 100%); }
+.paper-grid { background-image: radial-gradient(rgba(49, 87, 70, .14) .65px, transparent .65px); background-size: 13px 13px; }
+
+@media (max-width: 640px) {
+  .container-wide { width: min(100% - 32px, 1160px); }
+}
