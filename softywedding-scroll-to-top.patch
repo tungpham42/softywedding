@@ -1,0 +1,48 @@
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index 6bdc9ec..0000000 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,5 +1,6 @@
+ import type { Metadata, Viewport } from "next";
+ import Script from "next/script";
++import { ScrollToTop } from "@/components/scrollToTop";
+ import "./globals.css";
+ 
+ export const metadata: Metadata = {
+@@ -43,6 +44,7 @@ export default function RootLayout({
+   return (
+     <html lang="en" suppressHydrationWarning>
+       <body suppressHydrationWarning>
++        <ScrollToTop />
+         {children}{" "}
+         {process.env.NEXT_PUBLIC_GA_ID && (
+           <>
+diff --git a/src/components/scrollToTop.tsx b/src/components/scrollToTop.tsx
+new file mode 100644
+--- /dev/null
++++ b/src/components/scrollToTop.tsx
+@@ -0,0 +1,24 @@
++"use client";
++
++import { useEffect, useRef } from "react";
++import { usePathname } from "next/navigation";
++
++/**
++ * Return to the top when navigating to a different route.
++ * Keep the initial page load and in-page hash navigation untouched.
++ */
++export function ScrollToTop() {
++  const pathname = usePathname();
++  const previousPathname = useRef(pathname);
++
++  useEffect(() => {
++    if (previousPathname.current === pathname) {
++      return;
++    }
++
++    previousPathname.current = pathname;
++    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
++  }, [pathname]);
++
++  return null;
++}

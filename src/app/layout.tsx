@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { ScrollToTop } from "@/components/scrollToTop";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -43,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <ScrollToTop />
         {children}{" "}
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>
