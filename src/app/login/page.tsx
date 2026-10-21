@@ -2,8 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
-import { AlternativeSignInButtons } from "@/components/auth/alternative-sign-in-buttons";
+import { SignInButtons } from "@/components/auth/sign-in-buttons";
 import { Icon } from "@/components/ui/icon";
 
 export const metadata: Metadata = { title: "Login now" };
@@ -33,11 +32,11 @@ export default function LoginPage() {
               Let’s pick up where you left off.
             </p>
             <p className="mt-2 text-xs leading-5 text-muted">
-              Sign in with Google to open your private wedding workspace.
+              Sign in with Google or Facebook, or continue as a guest, to open
+              your private wedding workspace.
             </p>
             <div className="mt-6">
-              <GoogleSignInButton />
-              <AlternativeSignInButtons />
+              <SignInButtons />
             </div>
             <div className="mt-5 flex items-start gap-2.5 border-t border-line pt-4">
               <Icon
