@@ -1,4 +1,4 @@
-# Everafter — Wedding planning platform
+# Softy — Wedding planning platform
 
 A Next.js App Router application for wedding planners, couples, and invited guests. Application records are read from and written to Firebase/Firestore; there are no seeded sample weddings, fake dashboard metrics, or demo RSVP codes.
 
@@ -130,3 +130,9 @@ npm run build
 ```
 
 A fresh Firebase project will show empty-state messages until you sign in and create wedding records. Public wedding pages are intentionally not available until the owner publishes the real record. If a planner needs access to an existing wedding, assign their Firebase UID to that document's `plannerUid` field using a trusted administrative workflow.
+
+## Visual design refresh
+
+The interface uses a warmer editorial direction: soft ivory backgrounds, clay/terracotta highlights, muted botanical greens, expressive serif headlines, larger photography, rounded surfaces, subtle depth, responsive audience cards, and clearer entry points for planners, couples, and guests. The sign-in, guest lookup, planner dashboard, couple workspace, and public wedding pages share this visual language. Icons remain inline SVG rather than emoji.
+
+The refreshed couple workspace hero uses the active wedding's saved Cloudinary cover image when one exists. Without a saved cover, it uses a neutral decorative panel and does not invent wedding details or sample metrics.

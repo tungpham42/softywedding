@@ -613,7 +613,7 @@ export function CoupleWorkspace() {
           className="mt-5 flex items-center gap-2 px-2 text-xs text-muted hover:text-pine"
         >
           <Icon name="arrow-right" size={14} className="rotate-180" />
-          Back to Everafter
+          Back to Softy
         </Link>
       </aside>
 
@@ -726,47 +726,86 @@ export function CoupleWorkspace() {
           )}
           {activeWedding && (
             <>
-              <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-                <div>
-                  <p className="eyebrow text-terra">
-                    Your story is taking shape
-                  </p>
-                  <h1 className="font-display mt-2 text-[36px] leading-tight sm:text-[44px]">
-                    {activeWedding.partnerOne} & {activeWedding.partnerTwo}.
-                  </h1>
-                  <p className="mt-2 text-sm text-muted">
-                    {activeWedding.venue ||
-                      "Your venue is waiting to be added."}
-                    {activeWedding.location
-                      ? ` · ${activeWedding.location}`
-                      : ""}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={togglePublish}
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold ${activeWedding.published ? "border border-line bg-paper text-ink" : "bg-pine text-white hover:bg-pine-dark"}`}
-                  >
-                    <Icon
-                      name={activeWedding.published ? "eye-off" : "globe"}
-                      size={15}
-                    />
-                    {activeWedding.published
-                      ? "Unpublish website"
-                      : "Publish website"}
-                  </button>
-                  {activeWedding.published && (
-                    <Link
-                      href={`/w/${activeWedding.slug}`}
-                      target="_blank"
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-line bg-paper px-4 text-sm font-semibold hover:border-pine"
+              <section
+                className={`relative isolate overflow-hidden rounded-[28px] border border-line px-6 py-7 sm:px-8 sm:py-9 ${activeWedding.heroImage ? "bg-cover bg-center text-white" : "warm-panel text-ink"}`}
+                style={
+                  activeWedding.heroImage
+                    ? { backgroundImage: `url('${activeWedding.heroImage}')` }
+                    : undefined
+                }
+              >
+                {activeWedding.heroImage ? (
+                  <div className="absolute inset-0 z-0 bg-gradient-to-r from-[#213328]/90 via-[#213328]/65 to-[#213328]/25" />
+                ) : (
+                  <>
+                    <div className="pointer-events-none absolute -right-10 -top-12 z-0 h-48 w-48 rounded-full border border-[#d9c8b7]" />
+                    <div className="pointer-events-none absolute -right-1 top-0 z-0 h-28 w-28 rounded-full border border-[#d9c8b7]" />
+                  </>
+                )}
+                <div className="relative z-10 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+                  <div>
+                    <p
+                      className={`eyebrow ${activeWedding.heroImage ? "text-white/70" : "text-terra"}`}
                     >
-                      View website <Icon name="arrow-up-right" size={15} />
-                    </Link>
-                  )}
+                      Your story is taking shape
+                    </p>
+                    <h1 className="font-display mt-3 text-[37px] leading-[1.02] sm:text-[49px]">
+                      {activeWedding.partnerOne}{" "}
+                      <span
+                        className={`italic ${activeWedding.heroImage ? "text-[#f0c7b4]" : "text-terra"}`}
+                      >
+                        &
+                      </span>{" "}
+                      {activeWedding.partnerTwo}
+                    </h1>
+                    <p
+                      className={`mt-3 text-sm ${activeWedding.heroImage ? "text-white/80" : "text-muted"}`}
+                    >
+                      {activeWedding.venue ||
+                        "Your venue is waiting to be added."}
+                      {activeWedding.location
+                        ? ` · ${activeWedding.location}`
+                        : ""}
+                    </p>
+                    <div
+                      className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-medium ${activeWedding.heroImage ? "text-white/75" : "text-muted"}`}
+                    >
+                      <span className="inline-flex items-center gap-1.5">
+                        <Icon name="calendar" size={14} />
+                        {formatDate(activeWedding.date)}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Icon name="check-circle" size={14} />
+                        {progress}% of the plan complete
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={togglePublish}
+                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-xs font-bold transition-colors ${activeWedding.published ? (activeWedding.heroImage ? "border border-white/40 bg-white/10 text-white hover:bg-white/20" : "border border-line bg-paper text-ink") : "bg-pine text-white hover:bg-pine-dark"}`}
+                    >
+                      <Icon
+                        name={activeWedding.published ? "eye-off" : "globe"}
+                        size={15}
+                      />
+                      {activeWedding.published
+                        ? "Unpublish website"
+                        : "Publish website"}
+                    </button>
+                    {activeWedding.published && (
+                      <Link
+                        href={`/w/${activeWedding.slug}`}
+                        target="_blank"
+                        className={`inline-flex h-11 items-center justify-center gap-2 rounded-full px-4 text-xs font-bold transition-colors ${activeWedding.heroImage ? "border border-white/40 bg-white/10 text-white hover:bg-white/20" : "border border-line bg-paper text-ink hover:border-pine"}`}
+                      >
+                        View website <Icon name="arrow-up-right" size={15} />
+                      </Link>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </section>
               <div className="mt-7 grid gap-4 sm:grid-cols-3">
                 <div className="rounded-2xl border border-line bg-paper p-5">
                   <div className="flex items-center justify-between">

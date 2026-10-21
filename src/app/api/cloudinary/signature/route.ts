@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const folder = "softy/weddings";
+  const folder = "Softy/weddings";
   cloudinary.config({
     cloud_name: cloudName,
     api_key: apiKey,

@@ -5,7 +5,7 @@ type IconName =
   | "check" | "plus" | "menu" | "close" | "sparkles" | "clipboard"
   | "mail" | "camera" | "globe" | "clock" | "map-pin" | "chevron-down"
   | "chevron-right" | "external" | "leaf" | "layout" | "wallet" | "settings"
-  | "search" | "check-circle" | "message" | "shield" | "flower" | "party";
+  | "search" | "check-circle" | "message" | "shield" | "flower" | "party" | "eye-off";
 
 const paths: Record<IconName, ReactNode> = {
   "arrow-right": <><path d="M4.5 12h15"/><path d="m13 5.5 6.5 6.5-6.5 6.5"/></>,
@@ -37,6 +37,7 @@ const paths: Record<IconName, ReactNode> = {
   shield: <><path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10Z"/><path d="m8.5 11.5 2.2 2.2 4.8-4.8"/></>,
   flower: <><path d="M12 12c-4.5 0-6.5-2.2-6.5-4.7A3.3 3.3 0 0 1 8.8 4c1.4 0 2.6 1 3.2 2.7C12.6 5 13.8 4 15.2 4a3.3 3.3 0 0 1 3.3 3.3C18.5 9.8 16.5 12 12 12Z"/><path d="M12 12c0 4.5-2.2 6.5-4.7 6.5A3.3 3.3 0 0 1 4 15.2c0-1.4 1-2.6 2.7-3.2C5 11.4 4 10.2 4 8.8"/><path d="M12 12c4.5 0 6.5 2.2 6.5 4.7a3.3 3.3 0 0 1-3.3 3.3c-1.4 0-2.6-1-3.2-2.7C11.4 19 10.2 20 8.8 20"/><circle cx="12" cy="12" r="2"/></>,
   party: <><path d="m4 20 7-16 3 8 6 3-16 5Z"/><path d="m15 4 .5-2M20 8l2-.5M18 2l-.5 2"/></>,
+  "eye-off": <><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c5.2 0 8.8 4.2 9.7 6-.4.8-1.5 2.3-3.5 3.6"/><path d="M6.2 6.2C3.9 7.6 2.6 9.6 2.3 11c.9 1.8 4.5 6 9.7 6 1.1 0 2.1-.2 3-.6"/></>,
 };
 
 export function Icon({ name, size = 20, className, ...props }: { name: IconName; size?: number; className?: string } & Omit<SVGProps<SVGSVGElement>, "name" | "color">) {

@@ -189,7 +189,7 @@ export default async function InvitationPage({
       <footer className="border-t border-line py-5 text-center text-[10px] text-muted">
         A little home for a very happy day ·{" "}
         <Link href="/" className="font-semibold text-pine">
-          Everafter
+          Softy
         </Link>
       </footer>
     </main>
