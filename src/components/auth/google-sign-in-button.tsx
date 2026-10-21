@@ -68,7 +68,6 @@ export function GoogleSignInButton() {
           />
         </svg>
         {busy ? "Connecting…" : "Continue with Google"}
-        {!busy && <Icon name="arrow-right" size={15} />}
       </button>
       {error && (
         <p
