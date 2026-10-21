@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   },
   description:
     "A thoughtful wedding planning platform for planners, couples, and the people celebrating with them.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  ),
   applicationName: "Softy Wedding",
   openGraph: {
     title: {
