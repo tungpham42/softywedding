@@ -21,8 +21,9 @@ function formatDate(value: string) {
 }
 
 export function PlannerWorkspace() {
+  const auth = getFirebaseAuth();
   const [user, setUser] = useState<User | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(() => Boolean(auth));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [weddings, setWeddings] = useState<Wedding[]>([]);
@@ -55,12 +56,7 @@ export function PlannerWorkspace() {
   }, []);
 
   useEffect(() => {
-    const auth = getFirebaseAuth();
     if (!auth) {
-      setAuthLoading(false);
-      setError(
-        "Firebase client settings are missing. Configure NEXT_PUBLIC_FIREBASE_* to load real wedding records.",
-      );
       return;
     }
     return onAuthStateChanged(auth, (currentUser) => {
@@ -69,7 +65,7 @@ export function PlannerWorkspace() {
       if (currentUser) void load(currentUser);
       else setWeddings([]);
     });
-  }, [load]);
+  }, [auth, load]);
 
   const now = new Date();
   const upcoming = weddings
@@ -146,12 +142,15 @@ export function PlannerWorkspace() {
             </div>
           </section>
 
-          {error && (
+          {(error ||
+            (!auth &&
+              "Firebase client settings are missing. Configure NEXT_PUBLIC_FIREBASE_* to load real wedding records.")) && (
             <p
               role="alert"
               className="mt-6 rounded-xl bg-[#fbebe7] px-4 py-3 text-xs leading-5 text-[#8c4937]"
             >
-              {error}
+              {error ||
+                "Firebase client settings are missing. Configure NEXT_PUBLIC_FIREBASE_* to load real wedding records."}
             </p>
           )}
           {!user ? (

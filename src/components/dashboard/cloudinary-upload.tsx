@@ -3,6 +3,7 @@
 import { useState, type ChangeEvent } from "react";
 import { getFirebaseAuth } from "@/lib/firebase/client";
 import { Icon } from "@/components/ui/icon";
+import Image from "next/image";
 
 type SignatureResponse = {
   cloudName: string;
@@ -200,7 +201,7 @@ export function CloudinaryUpload({
 
       {previewUrl && (
         <div className="mt-5 grid gap-4 rounded-xl bg-sage-soft p-3 sm:grid-cols-[160px_1fr] sm:items-center">
-          <img
+          <Image
             src={previewUrl}
             alt={currentImageAlt}
             className="h-[120px] w-full rounded-lg object-cover"

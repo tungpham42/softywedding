@@ -19,6 +19,7 @@ import type {
   WeddingScheduleItem,
   WeddingStoryPhoto,
 } from "@/lib/wedding";
+import Image from "next/image";
 
 function formatDate(value: string) {
   if (!value) return "Date not set";
@@ -191,6 +192,7 @@ function WeddingCreateForm({
 }
 
 export function CoupleWorkspace() {
+  const [currentTime, setCurrentTime] = useState<number | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -203,6 +205,7 @@ export function CoupleWorkspace() {
   const [savingDetails, setSavingDetails] = useState(false);
   const [notice, setNotice] = useState("");
   const [headline, setHeadline] = useState("");
+  const [weddingDate, setWeddingDate] = useState("");
   const [story, setStory] = useState("");
   const [venue, setVenue] = useState("");
   const [location, setLocation] = useState("");
@@ -216,6 +219,11 @@ export function CoupleWorkspace() {
     Record<string, { caption: string; altText: string }>
   >({});
   const [storyPhotoBusy, setStoryPhotoBusy] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setCurrentTime(Date.now()), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const loadWeddings = useCallback(
     async (currentUser: User, selectSlug?: string) => {
@@ -258,11 +266,13 @@ export function CoupleWorkspace() {
   useEffect(() => {
     const auth = getFirebaseAuth();
     if (!auth) {
-      setAuthLoading(false);
-      setError(
-        "Firebase client settings are missing. Configure the NEXT_PUBLIC_FIREBASE_* values to sign in and load wedding records.",
-      );
-      return;
+      const timer = window.setTimeout(() => {
+        setAuthLoading(false);
+        setError(
+          "Firebase client settings are missing. Configure the NEXT_PUBLIC_FIREBASE_* values to sign in and load wedding records.",
+        );
+      }, 0);
+      return () => window.clearTimeout(timer);
     }
     return onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -276,16 +286,26 @@ export function CoupleWorkspace() {
     () => weddings.find((wedding) => wedding.slug === activeSlug) ?? null,
     [weddings, activeSlug],
   );
-  useEffect(() => {
-    setHeadline(activeWedding?.headline ?? "");
-    setStory(activeWedding?.story ?? "");
-    setVenue(activeWedding?.venue ?? "");
-    setLocation(activeWedding?.location ?? "");
-    setCeremonyTime(activeWedding?.ceremonyTime ?? "");
-    setReceptionTime(activeWedding?.receptionTime ?? "");
-    setNotice("");
-  }, [
+  const storyPhotoDraftsKey = JSON.stringify([
     activeWedding?.slug,
+    activeWedding?.storyPhotos,
+  ]);
+  const [previousStoryPhotoDraftsKey, setPreviousStoryPhotoDraftsKey] =
+    useState(storyPhotoDraftsKey);
+  if (storyPhotoDraftsKey !== previousStoryPhotoDraftsKey) {
+    setPreviousStoryPhotoDraftsKey(storyPhotoDraftsKey);
+    setStoryPhotoDrafts(
+      Object.fromEntries(
+        (activeWedding?.storyPhotos ?? []).map((photo) => [
+          photo.id,
+          { caption: photo.caption ?? "", altText: photo.altText ?? "" },
+        ]),
+      ),
+    );
+  }
+  const weddingDetailsKey = JSON.stringify([
+    activeWedding?.slug,
+    activeWedding?.date,
     activeWedding?.headline,
     activeWedding?.story,
     activeWedding?.venue,
@@ -293,6 +313,19 @@ export function CoupleWorkspace() {
     activeWedding?.ceremonyTime,
     activeWedding?.receptionTime,
   ]);
+  const [previousWeddingDetailsKey, setPreviousWeddingDetailsKey] =
+    useState(weddingDetailsKey);
+  if (weddingDetailsKey !== previousWeddingDetailsKey) {
+    setPreviousWeddingDetailsKey(weddingDetailsKey);
+    setWeddingDate(activeWedding?.date ?? "");
+    setHeadline(activeWedding?.headline ?? "");
+    setStory(activeWedding?.story ?? "");
+    setVenue(activeWedding?.venue ?? "");
+    setLocation(activeWedding?.location ?? "");
+    setCeremonyTime(activeWedding?.ceremonyTime ?? "");
+    setReceptionTime(activeWedding?.receptionTime ?? "");
+    setNotice("");
+  }
 
   async function updateWedding(changes: Partial<Wedding>) {
     if (!user || !activeWedding)
@@ -324,8 +357,14 @@ export function CoupleWorkspace() {
     setSavingDetails(true);
     setNotice("");
     setError("");
+    if (!weddingDate) {
+      setError("Please choose a wedding date.");
+      setSavingDetails(false);
+      return;
+    }
     try {
       await updateWedding({
+        date: weddingDate,
         headline,
         story,
         venue,
@@ -342,18 +381,6 @@ export function CoupleWorkspace() {
       setSavingDetails(false);
     }
   }
-
-  useEffect(() => {
-    const photos = activeWedding?.storyPhotos ?? [];
-    setStoryPhotoDrafts(
-      Object.fromEntries(
-        photos.map((photo) => [
-          photo.id,
-          { caption: photo.caption ?? "", altText: photo.altText ?? "" },
-        ]),
-      ),
-    );
-  }, [activeWedding?.slug, activeWedding?.storyPhotos]);
 
   async function saveStoryPhoto(photoId: string) {
     if (!activeWedding) return;
@@ -977,13 +1004,14 @@ export function CoupleWorkspace() {
                   <div className="mt-3 flex items-end gap-2">
                     <span className="font-display text-[34px]">
                       {activeWedding.date &&
+                      currentTime !== null &&
                       new Date(`${activeWedding.date}T23:59:59`).getTime() >=
-                        Date.now()
+                        currentTime
                         ? Math.ceil(
                             (new Date(
                               `${activeWedding.date}T23:59:59`,
                             ).getTime() -
-                              Date.now()) /
+                              currentTime) /
                               86400000,
                           )
                         : "—"}
@@ -1136,6 +1164,24 @@ export function CoupleWorkspace() {
                       </span>
                     </div>
                     <div className="mt-4 space-y-3">
+                      <div>
+                        <label
+                          htmlFor="wedding-details-date"
+                          className="mb-1 block text-[11px] font-semibold"
+                        >
+                          Wedding date
+                        </label>
+                        <input
+                          id="wedding-details-date"
+                          type="date"
+                          required
+                          value={weddingDate}
+                          onChange={(event) =>
+                            setWeddingDate(event.target.value)
+                          }
+                          className="h-10 w-full rounded-xl border border-line bg-white px-3 text-xs outline-none focus:border-pine"
+                        />
+                      </div>
                       <div>
                         <label
                           htmlFor="wedding-headline"
@@ -1416,7 +1462,7 @@ export function CoupleWorkspace() {
                             key={photo.id}
                             className="overflow-hidden rounded-xl border border-line bg-white"
                           >
-                            <img
+                            <Image
                               src={photo.url}
                               alt={
                                 draft.altText ||

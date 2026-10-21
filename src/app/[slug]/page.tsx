@@ -12,6 +12,7 @@ import {
 import { formatWeddingDate } from "@/lib/utils";
 import { SiteFooter } from "@/components/site-footer";
 import { Icon } from "@/components/ui/icon";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -199,7 +200,7 @@ export default async function WeddingWebsitePage({
                   key={photo.id}
                   className={`overflow-hidden rounded-2xl border border-line bg-white ${index % 5 === 1 ? "sm:translate-y-5" : ""}`}
                 >
-                  <img
+                  <Image
                     src={photo.url}
                     alt={
                       photo.altText || photo.caption || "Wedding story photo"
