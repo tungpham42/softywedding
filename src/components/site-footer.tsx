@@ -27,7 +27,10 @@ export function SiteFooter() {
         <div>
           <p className="eyebrow text-white/45">Your corner</p>
           <div className="mt-4 flex flex-col gap-3 text-sm text-white/75">
-            <Link href="/planner" className="transition-colors hover:text-white">
+            <Link
+              href="/planner"
+              className="transition-colors hover:text-white"
+            >
               Wedding planners
             </Link>
             <Link href="/couple" className="transition-colors hover:text-white">
@@ -50,10 +53,16 @@ export function SiteFooter() {
             <Link href="/guest" className="transition-colors hover:text-white">
               Find an invitation
             </Link>
-            <Link href="/privacy-policy" className="transition-colors hover:text-white">
+            <Link
+              href="/privacy-policy"
+              className="transition-colors hover:text-white"
+            >
               Privacy Policy
             </Link>
-            <Link href="/terms-and-conditions" className="transition-colors hover:text-white">
+            <Link
+              href="/terms-and-conditions"
+              className="transition-colors hover:text-white"
+            >
               Terms &amp; Conditions
             </Link>
           </div>

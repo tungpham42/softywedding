@@ -51,7 +51,10 @@ export function readString(value: unknown): string {
 export function readWeddingSchedule(value: unknown): WeddingScheduleItem[] {
   if (!Array.isArray(value)) return [];
   return value
-    .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null && !Array.isArray(item))
+    .filter(
+      (item): item is Record<string, unknown> =>
+        typeof item === "object" && item !== null && !Array.isArray(item),
+    )
     .map((item) => ({
       time: readString(item.time),
       title: readString(item.title),
@@ -63,9 +66,15 @@ export function readWeddingSchedule(value: unknown): WeddingScheduleItem[] {
 export function readWeddingStoryPhotos(value: unknown): WeddingStoryPhoto[] {
   if (!Array.isArray(value)) return [];
   return value
-    .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null && !Array.isArray(item))
+    .filter(
+      (item): item is Record<string, unknown> =>
+        typeof item === "object" && item !== null && !Array.isArray(item),
+    )
     .map((item, index) => ({
-      id: typeof item.id === "string" && item.id.trim() ? item.id.trim().slice(0, 100) : `story-photo-${index + 1}`,
+      id:
+        typeof item.id === "string" && item.id.trim()
+          ? item.id.trim().slice(0, 100)
+          : `story-photo-${index + 1}`,
       url: readString(item.url).trim().slice(0, 2000),
       caption: readString(item.caption).trim().slice(0, 240),
       altText: readString(item.altText).trim().slice(0, 160),
@@ -76,9 +85,13 @@ export function readWeddingStoryPhotos(value: unknown): WeddingStoryPhoto[] {
 export function readWeddingTasks(value: unknown): WeddingTask[] {
   if (!Array.isArray(value)) return [];
   return value
-    .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null && !Array.isArray(item))
+    .filter(
+      (item): item is Record<string, unknown> =>
+        typeof item === "object" && item !== null && !Array.isArray(item),
+    )
     .map((item, index) => ({
-      id: typeof item.id === "string" && item.id ? item.id : `task-${index + 1}`,
+      id:
+        typeof item.id === "string" && item.id ? item.id : `task-${index + 1}`,
       category: readString(item.category),
       title: readString(item.title),
       detail: readString(item.detail),

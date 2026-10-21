@@ -12,7 +12,10 @@ const firebaseConfig = {
 };
 
 export const isClientFirebaseConfigured = Boolean(
-  firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId && firebaseConfig.appId,
+  firebaseConfig.apiKey &&
+  firebaseConfig.authDomain &&
+  firebaseConfig.projectId &&
+  firebaseConfig.appId,
 );
 
 let clientApp: FirebaseApp | null = null;
@@ -20,7 +23,9 @@ let clientApp: FirebaseApp | null = null;
 export function getFirebaseApp(): FirebaseApp | null {
   if (!isClientFirebaseConfigured) return null;
   if (clientApp) return clientApp;
-  clientApp = getApps().find((app) => app.name === "[DEFAULT]") ?? initializeApp(firebaseConfig);
+  clientApp =
+    getApps().find((app) => app.name === "[DEFAULT]") ??
+    initializeApp(firebaseConfig);
   return clientApp;
 }
 

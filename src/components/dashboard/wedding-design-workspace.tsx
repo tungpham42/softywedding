@@ -113,11 +113,14 @@ export function WeddingDesignWorkspace() {
         design: wedding.design ?? DEFAULT_WEDDING_DESIGN,
       }));
       setWeddings(rows);
-      setActiveSlug((current) =>
-        rows.some((row) => row.slug === current)
+      setActiveSlug((current) => {
+        const nextSlug = rows.some((row) => row.slug === current)
           ? current
-          : (rows[0]?.slug ?? ""),
-      );
+          : (rows[0]?.slug ?? "");
+        const nextWedding = rows.find((row) => row.slug === nextSlug);
+        setDraft(nextWedding?.design ?? DEFAULT_WEDDING_DESIGN);
+        return nextSlug;
+      });
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -132,17 +135,24 @@ export function WeddingDesignWorkspace() {
   useEffect(() => {
     const auth = getFirebaseAuth();
     if (!auth) {
-      setAuthLoading(false);
-      setError(
-        "Firebase client settings are missing. Configure the NEXT_PUBLIC_FIREBASE_* values to use the design studio.",
-      );
+      queueMicrotask(() => {
+        setAuthLoading(false);
+        setError(
+          "Firebase client settings are missing. Configure the NEXT_PUBLIC_FIREBASE_* values to use the design studio.",
+        );
+      });
       return;
     }
     return onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
       if (currentUser) void loadWeddings(currentUser);
-      else setWeddings([]);
+      else {
+        setWeddings([]);
+        setActiveSlug("");
+        setDraft(DEFAULT_WEDDING_DESIGN);
+        setNotice("");
+      }
     });
   }, [loadWeddings]);
 
@@ -151,10 +161,16 @@ export function WeddingDesignWorkspace() {
     [weddings, activeSlug],
   );
 
-  useEffect(() => {
-    setDraft(activeWedding?.design ?? DEFAULT_WEDDING_DESIGN);
-    setNotice("");
-  }, [activeWedding?.slug, activeWedding?.design]);
+  const selectWedding = useCallback(
+    (nextSlug: string, nextWeddings: WeddingOption[] = weddings) => {
+      const nextWedding =
+        nextWeddings.find((wedding) => wedding.slug === nextSlug) ?? null;
+      setActiveSlug(nextSlug);
+      setDraft(nextWedding?.design ?? DEFAULT_WEDDING_DESIGN);
+      setNotice("");
+    },
+    [weddings],
+  );
 
   function updateDraft<K extends keyof WeddingDesign>(
     key: K,
@@ -335,7 +351,7 @@ export function WeddingDesignWorkspace() {
                 <select
                   id="design-wedding"
                   value={activeSlug}
-                  onChange={(event) => setActiveSlug(event.target.value)}
+                  onChange={(event) => selectWedding(event.target.value)}
                   className="form-field mt-2"
                 >
                   {weddings.map((wedding) => (

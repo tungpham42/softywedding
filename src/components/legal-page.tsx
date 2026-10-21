@@ -71,7 +71,10 @@ export function LegalPage({
               href="/"
               className="inline-flex shrink-0 items-center font-semibold text-pine transition-colors hover:text-terra"
             >
-              Back to Softy Wedding <span className="ml-2" aria-hidden="true">→</span>
+              Back to Softy Wedding{" "}
+              <span className="ml-2" aria-hidden="true">
+                →
+              </span>
             </Link>
           </div>
         </div>
@@ -100,5 +103,4 @@ export function LegalSection({
   );
 }
 
-export const legalListClassName =
-  "list-disc space-y-2 pl-5 marker:text-terra";
+export const legalListClassName = "list-disc space-y-2 pl-5 marker:text-terra";

@@ -1,5 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb, verifyBearerToken } from "@/lib/firebase/admin";
+import { renameWeddingSlug, SlugError } from "@/lib/wedding-slug";
 import { readWeddingSchedule, readWeddingStoryPhotos, readWeddingTasks } from "@/lib/wedding";
 
 export const runtime = "nodejs";
@@ -68,6 +69,22 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
   if (!snap.exists) return Response.json({ error: "Wedding not found." }, { status: 404 });
   const current = snap.data() ?? {};
   if (current.ownerUid !== identity.uid && current.plannerUid !== identity.uid) return Response.json({ error: "You don’t have permission to update this wedding." }, { status: 403 });
+
+  if ("slug" in body) {
+    // Renaming moves the document (the slug is its ID), so it is owner-only
+    // and must be sent on its own, never mixed with other field edits.
+    if (current.ownerUid !== identity.uid) return Response.json({ error: "Only the wedding owner can change the website address." }, { status: 403 });
+    if (typeof body.slug !== "string") return Response.json({ error: "slug must be text." }, { status: 400 });
+    if (Object.keys(body).length > 1) return Response.json({ error: "Change the website address on its own, without other fields." }, { status: 400 });
+    try {
+      const newSlug = await renameWeddingSlug(db, slug, body.slug.trim().toLowerCase());
+      return Response.json({ ok: true, slug: newSlug });
+    } catch (error) {
+      if (error instanceof SlugError) return Response.json({ error: error.message }, { status: error.status });
+      console.error("Wedding slug rename failed", error);
+      return Response.json({ error: "We couldn’t change the website address." }, { status: 500 });
+    }
+  }
 
   const updates: Record<string, unknown> = {};
   const stringFields: Record<string, number> = {

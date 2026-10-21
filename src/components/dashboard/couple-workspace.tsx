@@ -32,6 +32,50 @@ function formatDate(value: string) {
   }).format(date);
 }
 
+const SLUG_MIN_LENGTH = 3;
+const SLUG_MAX_LENGTH = 60;
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// Public sites live at /{slug}, so a slug must never shadow a real route.
+// Keep this in sync with the server-side check.
+const RESERVED_SLUGS = new Set([
+  "api",
+  "couple",
+  "guest",
+  "invite",
+  "login",
+  "planner",
+  "w",
+  "admin",
+  "dashboard",
+  "settings",
+]);
+
+/** Live-typing normaliser: keeps a trailing hyphen so "anh-nam" can be typed. */
+function slugifyInput(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+/, "")
+    .slice(0, SLUG_MAX_LENGTH);
+}
+
+function finalizeSlug(value: string) {
+  return slugifyInput(value).replace(/-+$/, "");
+}
+
+function getSlugError(slug: string) {
+  if (slug.length < SLUG_MIN_LENGTH)
+    return `The address must be at least ${SLUG_MIN_LENGTH} characters.`;
+  if (!SLUG_PATTERN.test(slug))
+    return "Use only lowercase letters, numbers and single hyphens.";
+  if (RESERVED_SLUGS.has(slug))
+    return "That address is reserved. Please choose another one.";
+  return "";
+}
+
 function WeddingCreateForm({
   user,
   onCreated,
@@ -206,6 +250,8 @@ export function CoupleWorkspace() {
   const [notice, setNotice] = useState("");
   const [headline, setHeadline] = useState("");
   const [weddingDate, setWeddingDate] = useState("");
+  const [detailsPartnerOne, setDetailsPartnerOne] = useState("");
+  const [detailsPartnerTwo, setDetailsPartnerTwo] = useState("");
   const [story, setStory] = useState("");
   const [venue, setVenue] = useState("");
   const [location, setLocation] = useState("");
@@ -219,6 +265,12 @@ export function CoupleWorkspace() {
     Record<string, { caption: string; altText: string }>
   >({});
   const [storyPhotoBusy, setStoryPhotoBusy] = useState(false);
+  const [slugDraft, setSlugDraft] = useState("");
+  const [slugEditing, setSlugEditing] = useState(false);
+  const [slugBusy, setSlugBusy] = useState(false);
+  // Carries the success message across the render-phase reset below, which
+  // would otherwise clear it when the slug (part of the reset key) changes.
+  const [pendingNotice, setPendingNotice] = useState("");
 
   useEffect(() => {
     const timer = window.setTimeout(() => setCurrentTime(Date.now()), 0);
@@ -305,6 +357,8 @@ export function CoupleWorkspace() {
   }
   const weddingDetailsKey = JSON.stringify([
     activeWedding?.slug,
+    activeWedding?.partnerOne,
+    activeWedding?.partnerTwo,
     activeWedding?.date,
     activeWedding?.headline,
     activeWedding?.story,
@@ -317,6 +371,8 @@ export function CoupleWorkspace() {
     useState(weddingDetailsKey);
   if (weddingDetailsKey !== previousWeddingDetailsKey) {
     setPreviousWeddingDetailsKey(weddingDetailsKey);
+    setDetailsPartnerOne(activeWedding?.partnerOne ?? "");
+    setDetailsPartnerTwo(activeWedding?.partnerTwo ?? "");
     setWeddingDate(activeWedding?.date ?? "");
     setHeadline(activeWedding?.headline ?? "");
     setStory(activeWedding?.story ?? "");
@@ -324,7 +380,10 @@ export function CoupleWorkspace() {
     setLocation(activeWedding?.location ?? "");
     setCeremonyTime(activeWedding?.ceremonyTime ?? "");
     setReceptionTime(activeWedding?.receptionTime ?? "");
-    setNotice("");
+    setSlugDraft(activeWedding?.slug ?? "");
+    setSlugEditing(false);
+    setNotice(pendingNotice);
+    setPendingNotice("");
   }
 
   async function updateWedding(changes: Partial<Wedding>) {
@@ -357,6 +416,13 @@ export function CoupleWorkspace() {
     setSavingDetails(true);
     setNotice("");
     setError("");
+    const nextPartnerOne = detailsPartnerOne.trim();
+    const nextPartnerTwo = detailsPartnerTwo.trim();
+    if (!nextPartnerOne || !nextPartnerTwo) {
+      setError("Please enter both partners’ names.");
+      setSavingDetails(false);
+      return;
+    }
     if (!weddingDate) {
       setError("Please choose a wedding date.");
       setSavingDetails(false);
@@ -364,6 +430,8 @@ export function CoupleWorkspace() {
     }
     try {
       await updateWedding({
+        partnerOne: nextPartnerOne,
+        partnerTwo: nextPartnerTwo,
         date: weddingDate,
         headline,
         story,
@@ -552,6 +620,95 @@ export function CoupleWorkspace() {
       );
     } finally {
       setScheduleBusy(false);
+    }
+  }
+
+  function startSlugEdit() {
+    if (!activeWedding) return;
+    setSlugDraft(activeWedding.slug);
+    setSlugEditing(true);
+    setError("");
+    setNotice("");
+  }
+
+  function cancelSlugEdit() {
+    setSlugDraft(activeWedding?.slug ?? "");
+    setSlugEditing(false);
+    setError("");
+  }
+
+  async function renameSlug(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!user || !activeWedding) return;
+    const previousSlug = activeWedding.slug;
+    const nextSlug = finalizeSlug(slugDraft);
+    setError("");
+    setNotice("");
+    if (nextSlug === previousSlug) {
+      setSlugEditing(false);
+      return;
+    }
+    const validationError = getSlugError(nextSlug);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    const consequence = activeWedding.published
+      ? "Your published website will move to the new address, and the old link will stop working."
+      : "Your website address will change.";
+    if (
+      !window.confirm(
+        `Change the address from /${previousSlug} to /${nextSlug}?\n\n${consequence} Invitation links keep working.`,
+      )
+    )
+      return;
+
+    setSlugBusy(true);
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch(
+        `/api/weddings/${encodeURIComponent(previousSlug)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ slug: nextSlug }),
+        },
+      );
+      const payload = (await response.json()) as {
+        error?: string;
+        slug?: string;
+      };
+      if (!response.ok)
+        throw new Error(
+          payload.error ||
+            (response.status === 409
+              ? "That address is already taken."
+              : "Could not change your website address."),
+        );
+      // Never assume success: a server that ignores unknown fields would
+      // answer 200 without moving the wedding.
+      if (payload.slug !== nextSlug)
+        throw new Error("The server did not confirm the new address.");
+
+      setPendingNotice(`Your website address is now /${payload.slug}.`);
+      setWeddings((rows) =>
+        rows.map((row) =>
+          row.slug === previousSlug ? { ...row, slug: nextSlug } : row,
+        ),
+      );
+      setActiveSlug(nextSlug);
+      setSlugEditing(false);
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not change your website address.",
+      );
+    } finally {
+      setSlugBusy(false);
     }
   }
 
@@ -1135,9 +1292,73 @@ export function CoupleWorkspace() {
                     </p>
                     <div className="mt-4 rounded-xl bg-[#f4f3eb] p-3">
                       <p className="text-[10px] text-muted">Website URL</p>
-                      <p className="mt-1 break-all text-xs font-semibold text-pine">
-                        /{activeWedding.slug}
-                      </p>
+                      {slugEditing ? (
+                        <form onSubmit={renameSlug} className="mt-1.5">
+                          <label
+                            htmlFor="wedding-slug"
+                            className="sr-only"
+                          >
+                            Website address
+                          </label>
+                          <div className="flex items-center rounded-lg border border-line bg-white focus-within:border-pine">
+                            <span className="pl-2.5 text-xs text-muted">/</span>
+                            <input
+                              id="wedding-slug"
+                              required
+                              autoFocus
+                              autoCapitalize="none"
+                              autoCorrect="off"
+                              spellCheck={false}
+                              minLength={SLUG_MIN_LENGTH}
+                              maxLength={SLUG_MAX_LENGTH}
+                              value={slugDraft}
+                              onChange={(event) =>
+                                setSlugDraft(slugifyInput(event.target.value))
+                              }
+                              aria-describedby="wedding-slug-hint"
+                              className="h-9 min-w-0 flex-1 bg-transparent px-1.5 text-xs font-semibold text-pine outline-none"
+                            />
+                          </div>
+                          <p
+                            id="wedding-slug-hint"
+                            className="mt-1.5 text-[10px] leading-4 text-muted"
+                          >
+                            Lowercase letters, numbers and hyphens, 3–60
+                            characters. Accents are removed automatically.
+                          </p>
+                          <div className="mt-2.5 flex items-center gap-2">
+                            <button
+                              type="submit"
+                              disabled={slugBusy}
+                              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-pine px-3 text-[11px] font-semibold text-white disabled:opacity-60"
+                            >
+                              <Icon name="check" size={12} />
+                              {slugBusy ? "Changing…" : "Change address"}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={slugBusy}
+                              onClick={cancelSlugEdit}
+                              className="inline-flex h-8 items-center rounded-full border border-line px-3 text-[11px] font-semibold text-muted disabled:opacity-60"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="mt-1 flex items-center justify-between gap-3">
+                          <p className="break-all text-xs font-semibold text-pine">
+                            /{activeWedding.slug}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={startSlugEdit}
+                            className="shrink-0 text-[11px] font-semibold text-terra hover:underline"
+                          >
+                            Change
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <button
                       type="button"
@@ -1164,6 +1385,44 @@ export function CoupleWorkspace() {
                       </span>
                     </div>
                     <div className="mt-4 space-y-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor="wedding-details-partner-one"
+                            className="mb-1 block text-[11px] font-semibold"
+                          >
+                            First partner’s name
+                          </label>
+                          <input
+                            id="wedding-details-partner-one"
+                            required
+                            maxLength={80}
+                            value={detailsPartnerOne}
+                            onChange={(event) =>
+                              setDetailsPartnerOne(event.target.value)
+                            }
+                            className="h-10 w-full rounded-xl border border-line bg-white px-3 text-xs outline-none focus:border-pine"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="wedding-details-partner-two"
+                            className="mb-1 block text-[11px] font-semibold"
+                          >
+                            Second partner’s name
+                          </label>
+                          <input
+                            id="wedding-details-partner-two"
+                            required
+                            maxLength={80}
+                            value={detailsPartnerTwo}
+                            onChange={(event) =>
+                              setDetailsPartnerTwo(event.target.value)
+                            }
+                            className="h-10 w-full rounded-xl border border-line bg-white px-3 text-xs outline-none focus:border-pine"
+                          />
+                        </div>
+                      </div>
                       <div>
                         <label
                           htmlFor="wedding-details-date"
