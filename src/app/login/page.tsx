@@ -1,8 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { Icon } from "@/components/ui/icon";
+
+export const metadata: Metadata = { title: "Login now" };
 
 export default function LoginPage() {
   return (
